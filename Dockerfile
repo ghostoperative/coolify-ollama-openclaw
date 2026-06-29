@@ -1,29 +1,20 @@
-# ============================================================
-# OpenClaw + Ollama — Single Container
-# Node 24 required by OpenClaw (https://www.npmjs.com/package/openclaw)
-# ============================================================
-FROM node:24-slim
+# Multi-process container: Ollama + OpenClaw gateway
+FROM node:22-bookworm-slim
 
-# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    curl \
-    ca-certificates \
-    bash \
+    curl ca-certificates bash gnupg \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Ollama
+# Install Ollama binary
 RUN curl -fsSL https://ollama.com/install.sh | sh
 
-# Install OpenClaw globally (correct package name: openclaw, not @openclaw/cli)
+# Install OpenClaw
 RUN npm install -g openclaw@latest
 
-# Create working directories
 RUN mkdir -p /root/.ollama /root/.openclaw/workspace
 
-# Copy entrypoint
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 18789
-
 ENTRYPOINT ["/entrypoint.sh"]
